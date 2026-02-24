@@ -14,23 +14,55 @@ export default function ForgotPassView({ onBack }: { onBack: () => void }) {
   const [subStep, setSubStep] = useState<"email" | "otp" | "reset">("email");
   const [email, setEmail] = useState("");
 
+  // (Success & Error Response)
   const forgotMutation = useMutation({
     mutationFn: authService.forgotPassword,
-    onSuccess: () => { setSubStep("otp"); toast.success("Code sent!"); },
-    onError: (err: any) => toast.error(err.response?.data?.message || "Failed to send code"),
+    onSuccess: (res: any) => { 
+      setSubStep("otp"); 
+
+      toast.success(res.data?.message || "Verification code sent!"); 
+    },
+    onError: (err: any) => {
+ 
+      toast.error(err.response?.data?.message || "Failed to send code");
+    },
   });
 
+  //  (Success & Error Response)
   const verifyMutation = useMutation({
     mutationFn: (otp: string) => authService.verifyForgotOtp({ email, otp }),
-    onSuccess: () => { setSubStep("reset"); toast.success("OTP Verified!"); },
-    onError: () => toast.error("Invalid OTP"),
+    onSuccess: (res: any) => { 
+      setSubStep("reset"); 
+      toast.success(res.data?.message || "OTP Verified Successfully!"); 
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Invalid OTP");
+    },
   });
 
-  const resetMutation = useMutation({
-    mutationFn: (newPassword: string) => authService.resetPassword({ email, newPassword }),
-    onSuccess: () => { toast.success("Password Updated!"); onBack(); },
-    onError: () => toast.error("Reset failed"),
-  });
+  // (Success & Error Response)
+const resetMutation = useMutation({
+  mutationFn: (newPassword: string) => authService.resetPassword({ email, newPassword }),
+  onSuccess: (res: any) => { 
+    toast.success(res.data?.message || "Password Updated!"); 
+    onBack(); 
+  },
+  onError: (err: any) => {
+
+    const errorSources = err.response?.data?.errorSources;
+    
+    if (errorSources && Array.isArray(errorSources)) {
+
+      const combinedMessage = errorSources.map((e: any) => e.message).join(", ");
+      toast.error("Security Requirements", {
+        description: combinedMessage,
+      });
+    } else {
+ 
+      toast.error(err.response?.data?.message || "Password reset failed");
+    }
+  },
+});
 
   return (
     <div className="space-y-6 pt-2">
