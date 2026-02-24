@@ -9,7 +9,8 @@ import {
   BarChart3, 
   Settings, 
   ShieldCheck,
-  ChevronLeft
+  ChevronLeft,
+  Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,12 +28,21 @@ export const Sidebar = () => {
   return (
     <aside className="w-64 border-r bg-white flex flex-col h-full transition-all duration-300">
       {/* Brand Logo */}
-      <div className="p-6 flex items-center gap-3 border-b">
-        <div className="bg-primary p-1.5 rounded-lg">
-          <ShieldCheck className="text-white w-6 h-6" />
-        </div>
-        <span className="font-bold text-xl tracking-tight">CodeLumina</span>
-      </div>
+<div className="p-3">
+    <Link href="/" className="flex items-center gap-3 group">
+          <div className="bg-slate-900 p-2 rounded-xl transition-all duration-500 ease-in-out group-hover:rotate-[15deg] group-hover:scale-110 shadow-lg group-hover:shadow-primary/20">
+            <Shield className="text-white w-6 h-6 transition-transform group-hover:scale-110" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-xl tracking-tighter text-slate-900 leading-none">
+              CodeLumina
+            </span>
+            <span className="text-[9px] uppercase tracking-[0.4em] font-black text-primary mt-1 opacity-80">
+              AI Auditor
+            </span>
+          </div>
+        </Link>
+</div>
 
       {/* Navigation Links */}
       <nav className="flex-1 p-4 space-y-1">
