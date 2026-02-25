@@ -1,238 +1,167 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
-import Editor from "@monaco-editor/react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Play, ShieldAlert, Zap, Target, CheckCircle2, AlertTriangle, Loader2, Code2, Search, Bug, Settings, X } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
-import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Activity, Code2, History, ShieldCheck, 
+  ArrowUpRight, Clock, Zap, Target, Loader2, 
+  TrendingUp
+} from "lucide-react";
+import Link from "next/link";
+import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
-export default function CodeReviewPage() {
-  const [code, setCode] = useState("// Paste your Node.js code here...");
-  const [gt, setGt] = useState("Vulnerable");
-  const [result, setResult] = useState<any>(null);
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (payload: any) => {
-      const res = await axiosInstance.post("/review/code", payload);
-      return res.data.data;
-    },
-    onSuccess: (data) => {
-      setResult(data);
-      toast.success(`Analysis Complete! Classified as ${data.classification}`);
-    },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Audit failed");
-    }
+export default function OverviewPage() {
+  // ১. এনালাইটিক্স এবং হিস্ট্রি ডেটা ফেচিং
+  const { data: analytics, isLoading: isStatsLoading } = useQuery({
+    queryKey: ["analytics"],
+    queryFn: async () => (await axiosInstance.get("/review/analytics")).data.data,
   });
+
+  const { data: history, isLoading: isHistoryLoading } = useQuery({
+    queryKey: ["history"],
+    queryFn: async () => (await axiosInstance.get("/review/my-history?limit=5")).data.data.result,
+  });
+
+  if (isStatsLoading || isHistoryLoading) return <div className="flex h-[80vh] items-center justify-center"><Loader2 className="animate-spin text-brand-primary" /></div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-10">
-      {/* --- Top Header & Action Bar --- */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-black text-white tracking-tighter italic flex items-center gap-3">
-            <div className="h-8 w-2 bg-brand-primary rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]" />
-            NEW AUDIT
-          </h1>
-          <p className="text-slate-100 text-sm font-medium pl-5">Benchmark LLM Precision vs. Human Ground Truth</p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-4 bg-brand-deep/50 p-2 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div className="flex items-center gap-2 px-3">
-                <span className="text-[10px] font-black text-slate-100 uppercase tracking-widest">Ground Truth:</span>
-                <Select value={gt} onValueChange={setGt}>
-                    <SelectTrigger className="w-36 h-10 bg-brand-dark border-white/10 text-brand-primary font-bold rounded-xl focus:ring-brand-primary/30 transition-all">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-brand-deep border-white/10 text-white rounded-xl">
-                        <SelectItem value="Vulnerable" className="focus:bg-brand-primary focus:text-brand-dark font-medium">Vulnerable</SelectItem>
-                        <SelectItem value="Safe" className="focus:bg-brand-primary focus:text-brand-dark font-medium">Safe</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <Button 
-              onClick={() => mutate({ code, groundTruth: gt })} 
-              disabled={isPending}
-              className="bg-brand-gradient hover:opacity-90 text-brand-dark font-black px-8 h-12 rounded-xl shadow-lg shadow-brand-primary/20 transition-all active:scale-95 disabled:opacity-50"
-            >
-              {isPending ? <Loader2 className="animate-spin" /> : <><Play size={18} className="mr-2 fill-current" /> RUN AUDIT</>}
-            </Button>
-        </div>
-      </div>
-
-      {/* --- Main Audit Grid --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[600px]">
-        
-  <Card className="lg:col-span-7 bg-[#1e1e1e] border-none shadow-2xl overflow-hidden rounded-xl ring-1 ring-white/10 flex flex-col">
-  
-  {/* --- VS Code Style Title Bar --- */}
-  <div className="bg-[#252526] px-4 py-2 flex items-center justify-between border-b border-black/20">
-    <div className="flex items-center gap-4">
-      {/* Window Controls */}
-      <div className="flex gap-2">
-        <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-        <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-        <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-      </div>
       
-      {/* File Tab */}
-      <div className="flex items-center gap-2 bg-[#1e1e1e] px-4 py-1.5 rounded-t-lg border-t border-x border-white/5 text-slate-300 text-xs font-medium relative -bottom-[9px]">
-        <Code2 size={14} className="text-brand-primary" />
-        index.js
-        <X size={12} className="ml-2 opacity-50 hover:opacity-100 cursor-pointer" />
+      {/* --- Welcome Header --- */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">Dashboard Overview</h1>
+          <p className="text-slate-400 text-sm">System status and recent research progress.</p>
+        </div>
+        <Button className="bg-brand-gradient text-brand-dark font-black rounded-xl" asChild>
+          <Link href="/dashboard/audit"><Code2 className="mr-2 h-4 w-4" /> Start New Audit</Link>
+        </Button>
       </div>
-    </div>
-    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Node.js Environment</span>
-  </div>
 
-  <div className="flex flex-1">
-    {/* --- Fake Sidebar (VS Code Activity Bar vibe) --- */}
-    <div className="w-12 bg-[#333333] hidden sm:flex flex-col items-center py-4 gap-4 border-r border-black/20">
-       <div className="p-2 text-white border-l-2 border-brand-primary bg-white/5"><Code2 size={20} /></div>
-       <div className="p-2 text-slate-500 hover:text-white transition-colors"><Search size={20} /></div>
-       <div className="p-2 text-slate-500 hover:text-white transition-colors"><Bug size={20} /></div>
-       <div className="mt-auto p-2 text-slate-500"><Settings size={20} /></div>
-    </div>
-
-    {/* --- Monaco Editor --- */}
-    <div className="flex-1 pt-2">
-      <Editor
-        height="500px"
-        defaultLanguage="javascript"
-        theme="vs-dark"
-        value={code}
-        onChange={(v) => setCode(v || "")}
-        loading={<Loader2 className="animate-spin text-brand-primary" />}
-        options={{
-          fontSize: 14,
-          fontFamily: "'Fira Code', 'JetBrains Mono', monospace",
-          fontLigatures: true,
-          minimap: { enabled: true, scale: 0.75, side: 'right' },
-          scrollbar: {
-            vertical: 'hidden',
-            horizontal: 'auto',
-            useShadows: false,
-            verticalScrollbarSize: 10,
-          },
-          lineNumbersMinChars: 3,
-          padding: { top: 20, bottom: 20 },
-          cursorBlinking: "smooth",
-          cursorSmoothCaretAnimation: "on",
-          smoothScrolling: true,
-          contextmenu: true,
-          renderLineHighlight: "all",
-          bracketPairColorization: { enabled: true },
-          guides: { indentation: true },
-          folding: true,
-          wordWrap: "on"
-        }}
-      />
-    </div>
-  </div>
-</Card>
-
-        {/* --- Result Visualization Panel --- */}
-        <Card className="lg:col-span-5 bg-brand-deep border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative border-t-4 border-t-brand-primary/50">
-            {!result ? (
-                <div className="h-full flex flex-col items-center justify-center p-12 text-center space-y-6">
-                    <div className="bg-brand-primary/5 p-8 rounded-full border border-brand-primary/10 animate-pulse">
-                        <Target className="text-brand-primary opacity-30 w-16 h-16" />
-                    </div>
-                    <div className="space-y-2">
-                        <p className="text-white font-bold text-lg">System Ready</p>
-                        <p className="text-slate-500 text-sm max-w-xs">Awaiting source code for security evaluation.</p>
-                    </div>
+      {/* --- Quick Stat Cards --- */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: "Total Audits", value: analytics?.metrics?.totalSamples, icon: Activity, color: "text-blue-400" },
+          { label: "Precision", value: analytics?.metrics?.precision, icon: Target, color: "text-cyan-400" },
+          { label: "Accuracy", value: analytics?.metrics?.accuracy, icon: ShieldCheck, color: "text-emerald-400" },
+          { label: "Reliability", value: "High", icon: Zap, color: "text-purple-400" },
+        ].map((s, i) => (
+          <Card key={i} className="bg-brand-deep border-white/5 rounded-2xl p-6 shadow-xl">
+             <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.label}</p>
+                  <h3 className={`text-2xl font-black ${s.color}`}>{s.value}</h3>
                 </div>
-            ) : (
-                <ScrollArea className="h-full">
-                    <div className="p-8 space-y-8">
-                        
-                        {/* Summary Metrics */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-brand-dark/50 p-4 rounded-3xl border border-white/5 text-center space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Classification</p>
-                                <p className={cn(
-                                    "text-2xl font-black tracking-tighter",
-                                    result.classification === 'TP' || result.classification === 'TN' ? "text-brand-secondary" : "text-red-400"
-                                )}>
-                                    {result.classification}
-                                </p>
-                            </div>
-                            <div className="bg-brand-dark/50 p-4 rounded-3xl border border-white/5 text-center space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reliability</p>
-                                <p className="text-2xl font-black text-brand-primary tracking-tighter">#{result.iteration}</p>
-                            </div>
-                        </div>
-
-                        {/* Severity Score Card */}
-                        <div className="relative p-6 rounded-3xl bg-brand-gradient/10 border border-brand-primary/20 overflow-hidden group">
-                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <ShieldAlert size={80} />
-                             </div>
-                             <p className="text-xs font-bold text-brand-primary uppercase tracking-widest mb-1">AI Security Rating</p>
-                             <div className="flex items-end gap-2">
-                                <h2 className="text-6xl font-black text-white leading-none">{result.analysis.rating}</h2>
-                                <span className="text-slate-400 font-bold text-xl mb-1">/10</span>
-                             </div>
-                             <p className="text-slate-400 text-xs mt-3 leading-relaxed">
-                                High scores indicate secure code, while low scores suggest critical vulnerabilities.
-                             </p>
-                        </div>
-
-                        <Separator className="bg-white/5" />
-
-                        {/* Vulnerabilities List */}
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-black text-white flex items-center gap-2">
-                                <AlertTriangle size={16} className="text-brand-primary" /> DETECTED ISSUES
-                            </h3>
-                            {result.analysis.vulnerabilities.map((v: any, i: number) => (
-                                <div key={i} className="p-5 rounded-2xl bg-brand-dark/80 border-l-4 border-brand-primary shadow-lg space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-bold text-brand-primary text-sm">{v.type}</span>
-                                        <Badge className="bg-brand-primary/10 text-brand-primary border-none text-[10px] font-black uppercase">
-                                            {v.severity}
-                                        </Badge>
-                                    </div>
-                                    <p className="text-xs text-slate-400 leading-relaxed">{v.description}</p>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Suggestions */}
-                        <div className="space-y-4 pb-4">
-                            <h3 className="text-sm font-black text-white flex items-center gap-2">
-                                <Zap size={16} className="text-brand-secondary" /> REFACTORING TIPS
-                            </h3>
-                            <div className="space-y-3">
-                                {result.analysis.suggestions.map((s: string, i: number) => (
-                                    <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-                                        <div className="h-5 w-5 rounded-full bg-brand-secondary/20 flex items-center justify-center shrink-0">
-                                            <CheckCircle2 size={12} className="text-brand-secondary" />
-                                        </div>
-                                        <p className="text-xs text-slate-300 leading-relaxed font-medium">{s}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                    </div>
-                </ScrollArea>
-            )}
-        </Card>
+                <s.icon size={20} className="text-slate-600" />
+             </div>
+          </Card>
+        ))}
       </div>
+
+     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
+  
+  {/* --- Left Column: Recent Audit Logs (8 Columns) --- */}
+  <Card className="lg:col-span-8 bg-brand-deep border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col h-full min-h-[500px]">
+    <CardHeader className="p-8 border-b border-white/5 flex flex-row items-center justify-between">
+      <CardTitle className="text-sm font-black text-white uppercase italic tracking-widest">Recent Audit Logs</CardTitle>
+      <Button variant="ghost" size="sm" className="text-xs text-brand-primary" asChild>
+         <Link href="/dashboard/history" className="flex items-center gap-2 font-bold uppercase tracking-tighter">
+            View All <History size={14} />
+         </Link>
+      </Button>
+    </CardHeader>
+    <CardContent className="p-0">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm border-collapse">
+          <thead className="bg-white/5 text-slate-500 font-bold uppercase text-[10px] tracking-widest">
+            <tr>
+              <th className="px-8 py-5 border-b border-white/5">Classification</th>
+              <th className="px-8 py-5 border-b border-white/5">Rating</th>
+              <th className="px-8 py-5 border-b border-white/5">Date</th>
+              <th className="px-8 py-5 border-b border-white/5 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {history?.map((item: any) => (
+              <tr key={item._id} className="hover:bg-white/[0.02] transition-colors group">
+                <td className="px-8 py-5">
+                   <Badge className={cn(
+                     "border-none font-black text-[10px] px-3 py-1 rounded-md",
+                     item.classification === 'TP' || item.classification === 'TN' ? "bg-emerald-500/10 text-emerald-400" : "bg-red-400/10 text-red-400"
+                   )}>{item.classification}</Badge>
+                </td>
+                <td className="px-8 py-5 font-bold text-slate-200">{item.analysis.rating}/10</td>
+                <td className="px-8 py-5 text-slate-500 font-mono text-xs">{new Date(item.createdAt).toLocaleDateString()}</td>
+                <td className="px-8 py-5 text-center">
+                   <Link href="/dashboard/history">
+                      <ArrowUpRight className="mx-auto text-slate-600 group-hover:text-brand-primary transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 cursor-pointer" size={20} />
+                   </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </CardContent>
+  </Card>
+
+  {/* --- Right Column: Engine & Trend Graph (4 Columns) --- */}
+  <div className="lg:col-span-4 flex flex-col gap-8 w-full min-w-0">
+    
+    {/* Current Engine Card */}
+    <Card className="bg-brand-deep border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl relative overflow-hidden group transition-all hover:border-brand-primary/30">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 blur-3xl rounded-full -mr-16 -mt-16" />
+      <div className="flex items-center gap-5 relative z-10">
+        <div className="h-14 w-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center border border-brand-primary/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+          <Zap className="text-brand-primary" size={28} />
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Current Engine</p>
+          <h4 className="text-white font-extrabold text-xl tracking-tight leading-none">Llama-3.3 <span className="text-brand-primary/60 font-medium">70b</span></h4>
+        </div>
+      </div>
+      <Separator className="bg-white/5" />
+      <div className="space-y-4 relative z-10 text-sm text-slate-300 font-medium leading-relaxed italic opacity-90">
+          &quot;Model latency is currently sub-second. Security audit parameters are optimized for Node.js.&quot;
+          <div className="flex items-center gap-2 pt-2">
+            <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.15em]">Service Operational</span>
+          </div>
+      </div>
+    </Card>
+
+    {/* --- Trend Graph Card (The Missing Graph) --- */}
+    <Card className="bg-brand-dark border border-dashed border-white/10 rounded-[2.5rem] p-8 shadow-xl relative min-h-[220px]">
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Audit Load Trend</p>
+        <TrendingUp size={14} className="text-brand-primary" />
+      </div>
+      <div className="h-[120px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={[
+            {v:10}, {v:35}, {v:20}, {v:50}, {v:40}, {v:75}, {v:60}
+          ]}>
+            <defs>
+              <linearGradient id="colorV" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <Area type="monotone" dataKey="v" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorV)" />
+            <Tooltip contentStyle={{backgroundColor: '#0a192f', border: 'none', borderRadius: '10px'}} itemStyle={{color: '#06b6d4'}} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="text-center text-[10px] text-slate-600 font-bold uppercase mt-4 tracking-tighter">Usage Intensity (Last 7 Days)</p>
+    </Card>
+
+  </div>
+</div>
     </div>
   );
-}
-
-// Utility function (if not already in lib/utils)
-function cn(...inputs: any[]) {
-    return inputs.filter(Boolean).join(" ");
 }
