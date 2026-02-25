@@ -27,7 +27,7 @@ export const DashboardHeader = () => {
           <DropdownMenuTrigger className="outline-none">
             <div className="flex items-center gap-3 group bg-brand-accent/30 p-1.5 pr-3 rounded-full border border-white/5 hover:border-brand-primary/30 transition-all">
               <Avatar className="h-8 w-8 border border-white/10 shadow-lg">
-                <AvatarImage src={user?.image} />
+                <AvatarImage src={user?.image} className="object-cover aspect-square"/>
                 <AvatarFallback className="bg-brand-primary text-brand-dark font-bold">
                   {user?.firstName?.charAt(0)}
                 </AvatarFallback>

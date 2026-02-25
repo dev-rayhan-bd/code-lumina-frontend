@@ -21,7 +21,7 @@ export default function CodeReviewPage() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: any) => {
       const res = await axiosInstance.post("/review/code", payload);
-      return res.data.data; // নিশ্চিত করো backend রেসপন্স এখান থেকেই আসছে
+      return res.data.data;
     },
     onSuccess: (data) => {
       setResult(data);
