@@ -1,98 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/auth.services";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, KeyRound, Timer, ArrowLeft } from "lucide-react";
+import { Timer, ArrowLeft, KeyRound, Loader2 } from "lucide-react";
 
-interface OtpViewProps {
-  email: string;
-  onBack: () => void;
-}
-
-export default function OtpView({ email, onBack }: OtpViewProps) {
+export default function OtpView({ email, onBack }: { email: string; onBack: () => void }) {
   const [timer, setTimer] = useState(60);
 
   useEffect(() => {
     if (timer > 0) {
-      const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
-      return () => clearInterval(interval);
+      const itv = setInterval(() => setTimer(p => p - 1), 1000);
+      return () => clearInterval(itv);
     }
   }, [timer]);
 
   const verifyMutation = useMutation({
     mutationFn: authService.verifyRegOtp,
     onSuccess: (res) => {
-      toast.success("Account Verified!", { description: "Welcome to CodeLumina AI!" });
- 
-      if (typeof window !== "undefined") {
-        window.location.href = "/dashboard";
-      }
-    },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Invalid OTP code");
-    },
-  });
+      toast.success(res.data.message || "Account Verified!");
 
+      if (typeof window !== "undefined") window.location.href = "/dashboard";
+    },
+    onError: (err: any) => toast.error(err.response?.data?.message || "Invalid Code"),
+  });
 
   const resendMutation = useMutation({
     mutationFn: () => authService.resendOtp(email),
-    onSuccess: () => {
-      setTimer(60);
-      toast.success("A new code has been sent to your email.");
-    },
+    onSuccess: () => { setTimer(60); toast.success("OTP Resent!"); }
   });
 
   return (
-    <div className="flex flex-col items-center space-y-8 py-4 animate-in slide-in-from-right-4 duration-500">
-      <div className="text-center space-y-2">
-        <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-2">
-          <KeyRound className="w-8 h-8 text-primary" />
-        </div>
-        <h3 className="text-xl font-bold">Verification Required</h3>
-        <p className="text-sm text-slate-500">Enter the 6-digit code sent to <br /><span className="font-semibold text-slate-900">{email}</span></p>
+    <div className="flex flex-col items-center space-y-8 py-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="relative">
+        <div className="absolute -inset-4 bg-brand-primary/20 blur-xl rounded-full"></div>
+        <KeyRound className="w-14 h-14 text-brand-primary relative z-10" />
       </div>
 
-      <InputOTP 
-        maxLength={6} 
-        disabled={verifyMutation.isPending}
-        onComplete={(otp) => verifyMutation.mutate({ email, otp })}
-      >
+      <div className="text-center space-y-2">
+        <h3 className="text-xl font-bold text-white">Verify Your Email</h3>
+        <p className="text-sm text-slate-400">We sent a 6-digit code to <br/><span className="text-brand-primary font-medium">{email}</span></p>
+      </div>
+
+      <InputOTP maxLength={6} onComplete={(otp) => verifyMutation.mutate({ email, otp })}>
         <InputOTPGroup className="gap-2">
-          {[0, 1, 2, 3, 4, 5].map((index) => (
-            <InputOTPSlot key={index} index={index} className="h-12 w-10 border-slate-300 rounded-md text-lg font-bold" />
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <InputOTPSlot key={i} index={i} className="h-14 w-12 bg-brand-accent/50 border-white/10 text-white font-black text-xl rounded-xl focus:ring-brand-primary" />
           ))}
         </InputOTPGroup>
       </InputOTP>
 
       <div className="w-full space-y-4">
-        <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-          <Timer size={16} />
+        <div className="flex items-center justify-center gap-2 text-sm">
           {timer > 0 ? (
-            <span>Resend code in <b className="text-slate-900">{timer}s</b></span>
+            <span className="text-slate-500 flex items-center gap-2 font-medium">
+              <Timer size={14} /> Resend in {timer}s
+            </span>
           ) : (
-            <button 
-              onClick={() => resendMutation.mutate()} 
-              disabled={resendMutation.isPending}
-              className="text-primary font-bold hover:underline"
-            >
-              Resend Code Now
+            <button onClick={() => resendMutation.mutate()} className="text-brand-primary font-bold hover:underline">
+              Resend OTP
             </button>
           )}
         </div>
-
-        <Button variant="ghost" className="w-full text-slate-400" onClick={onBack}>
-          <ArrowLeft className="mr-2 w-4 h-4" /> Change Email
+        <Button variant="ghost" className="w-full text-slate-500 hover:text-white" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2"/> Back to Auth
         </Button>
       </div>
 
       {verifyMutation.isPending && (
-        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center rounded-xl">
-           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl z-20">
+          <Loader2 className="w-10 h-10 animate-spin text-brand-primary" />
         </div>
       )}
     </div>

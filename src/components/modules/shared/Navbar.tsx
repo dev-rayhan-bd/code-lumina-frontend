@@ -1,70 +1,89 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
-import { Shield } from "lucide-react";
+import {  Menu, ShieldCheck } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
+
+
+  const NavLinks = () => (
+    <>
+      {["Methodology", "Documentation", "Contact"].map((link) => (
+        <Link
+          key={link}
+          href={`/${link.toLowerCase()}`}
+          className="text-sm font-semibold text-slate-400 hover:text-brand-primary transition-all relative group"
+        >
+          {link}
+          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full" />
+        </Link>
+      ))}
+    </>
+  );
 export const LandingNavbar = async () => {
   const cookieStore = await cookies();
-  const token = cookieStore.get("accessToken")?.value;
-  const isLoggedIn = !!token;
+  const isLoggedIn = cookieStore.has("accessToken");
+
+
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 transition-all duration-300">
+    <nav className="fixed top-0 w-full z-50 bg-brand-dark/80 backdrop-blur-md border-b border-white/5">
       <div className="container mx-auto px-6 h-20 flex justify-between items-center">
         
-        {/* --- Logo with Animation  --- */}
+        {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="bg-slate-900 p-2 rounded-xl transition-all duration-500 ease-in-out group-hover:rotate-[15deg] group-hover:scale-110 shadow-lg group-hover:shadow-primary/20">
-            <Shield className="text-white w-6 h-6 transition-transform group-hover:scale-110" />
+          <div className="bg-brand-primary p-2 rounded-xl transition-all duration-500 group-hover:rotate-[15deg] group-hover:scale-110 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+            <ShieldCheck className="text-brand-dark w-6 h-6" />
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-xl tracking-tighter text-slate-900 leading-none">
-              CodeLumina
-            </span>
-            <span className="text-[9px] uppercase tracking-[0.4em] font-black text-primary mt-1 opacity-80">
-              AI Auditor
-            </span>
+            <span className="font-bold text-xl text-white tracking-tighter">CodeLumina</span>
+            <span className="text-[9px] uppercase tracking-[0.4em] font-black text-brand-primary">AI Auditor</span>
           </div>
         </Link>
 
-        {/* --- Navigation Links (Gap fixed) --- */}
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10">
-          {[
-            { label: "Methodology", href: "/methodology" },
-            { label: "Documentation", href: "/docs" },
-            { label: "Contact", href: "/contact" },
-          ].map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-bold text-slate-600 hover:text-primary transition-all duration-300 relative group py-2"
-            >
-              {link.label}
-              {/* Bottom active line animation */}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          <NavLinks />
         </div>
 
-        {/* --- Auth Actions --- */}
-        <div className="flex items-center gap-5">
-          {!isLoggedIn ? (
-            <>
-              <Link 
-                href="/login" 
-                className="hidden sm:block text-sm font-extrabold text-slate-700 hover:text-primary transition-colors"
-              >
-                Log in
-              </Link>
-              <Button asChild className="rounded-full px-8 font-bold shadow-xl shadow-primary/20 hover:translate-y-[-2px] active:translate-y-[0px] transition-all">
-                <Link href="/login?tab=register">Get Started</Link>
+        {/* Auth Actions */}
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
+            {!isLoggedIn ? (
+              <>
+                <Link href="/login" className="text-sm font-bold text-white hover:text-brand-primary">Log in</Link>
+                <Button asChild className="rounded-full px-8 bg-brand-primary hover:bg-cyan-500 text-brand-dark font-bold transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                  <Link href="/login?tab=register">Get Started</Link>
+                </Button>
+              </>
+            ) : (
+              <Button asChild variant="outline" className="rounded-full px-8 border-white/10 text-white hover:bg-white/5">
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
-            </>
-          ) : (
-            <Button asChild variant="outline" className="rounded-full px-8 font-extrabold border-2 border-slate-100 hover:bg-slate-50 hover:border-primary/20 transition-all">
-              <Link href="/dashboard">Get Started</Link>
-            </Button>
-          )}
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white">
+                  <Menu size={28} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-brand-dark border-white/10 text-white">
+                <div className="flex flex-col gap-8 mt-12">
+                  <NavLinks />
+                  <hr className="border-white/5" />
+                  {!isLoggedIn ? (
+                    <Button asChild className="bg-brand-primary text-brand-dark font-bold"><Link href="/login">Log in</Link></Button>
+                  ) : (
+                    <Button asChild variant="outline"><Link href="/dashboard">Dashboard</Link></Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
