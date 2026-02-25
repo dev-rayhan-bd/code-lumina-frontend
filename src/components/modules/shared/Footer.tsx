@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Github, Linkedin, Twitter } from "lucide-react";
+import {  Github, Linkedin, Twitter, ShieldCheck } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -9,7 +9,7 @@ export const Footer = () => {
           {/* Column 1: Info */}
           <div className="col-span-1 md:col-span-1 space-y-4">
             <div className="flex items-center gap-2 font-bold text-xl text-white">
-              <Shield className="text-white w-6 h-6" />
+              <ShieldCheck className="text-white w-6 h-6" />
               <span>CodeLumina AI</span>
             </div>
             <p className="text-sm text-white leading-relaxed">

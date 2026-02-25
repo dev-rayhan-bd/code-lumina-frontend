@@ -25,7 +25,7 @@ export const Hero = () => (
 
         <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
           A quantitative study on LLM accuracy. Analyze your Node.js code with 
-          Llama-3.3 & Gemini Pro to detect critical vulnerabilities.
+          Llama-3.3 to detect critical vulnerabilities.
         </p>
 
         <div className="flex justify-center gap-4 pt-4">

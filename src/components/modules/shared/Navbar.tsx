@@ -58,7 +58,7 @@ export const LandingNavbar = async () => {
               </>
             ) : (
               <Button asChild variant="outline" className="rounded-full px-8 border-white/10 text-white hover:bg-white/5">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">Get Started</Link>
               </Button>
             )}
           </div>
@@ -78,7 +78,7 @@ export const LandingNavbar = async () => {
                   {!isLoggedIn ? (
                     <Button asChild className="bg-brand-primary text-brand-dark font-bold"><Link href="/login">Log in</Link></Button>
                   ) : (
-                    <Button asChild variant="outline"><Link href="/dashboard">Dashboard</Link></Button>
+                    <Button asChild variant="outline"><Link href="/dashboard">Get Started</Link></Button>
                   )}
                 </div>
               </SheetContent>
