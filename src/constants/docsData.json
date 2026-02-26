@@ -1,0 +1,82 @@
+[
+  {
+    "id": "dashboard-metrics",
+    "category": "Dashboard Overview",
+    "title": "System Metrics & Indicators",
+    "description": "Understanding the logic behind Reliability, Trends, and System status strings.",
+    "technical_points": [
+      {
+        "point": "Reliability Index: HIGH Logic",
+        "detail": "Reliability is defined as 'Consistency over Iterations'. When the same code is audited multiple times, the system compares the Classification (TP, TN, etc.) and Rating. If the variance is < 0.05 and the Classification remains unchanged for 3+ cycles, the index is marked 'HIGH'. It proves the model is deterministic under current parameters."
+      },
+      {
+        "point": "Audit Load Trend Analysis",
+        "detail": "This trend monitors 'Request Density' over time. In a research context, it evaluates 'Throughput Stability'. By analyzing peaks and valleys, a researcher can determine if the LLM engine maintains accuracy during high-load scenarios or if latency degradation affects the audit quality."
+      },
+      {
+        "point": "Node.js Optimization String",
+        "detail": "The phrase 'Security audit parameters are optimized for Node.js' refers to the System Prompt constraints. We have limited the LLM's 'Latent Space' to focus specifically on Node.js sinks (e.g., db.query, eval(), fs.readFile) and sources (e.g., req.body, req.params), ignoring irrelevant patterns from other languages."
+      },
+      {
+        "point": "Sub-second Latency Significance",
+        "detail": "Latency < 1s is crucial for 'Developer Experience' and 'Real-time Research'. We use Groq's LPU to ensure that the time taken for token generation doesn't introduce 'Session Timeout' or 'Context Fragmentation', allowing for rapid iterative testing."
+      }
+    ]
+  },
+  {
+    "id": "analytics-dynamics",
+    "category": "Analytics Engine",
+    "title": "Precision & Recall Dynamics",
+    "description": "How to mathematically improve the performance of your automated reviewer.",
+    "technical_points": [
+      {
+        "point": "Increasing Precision (FP Reduction)",
+        "detail": "Precision increases as False Positives (FP) decrease. To achieve this, the system prompt must be tuned to be more 'Conservative'. Instead of guessing, the AI should only flag a bug if it can trace a clear data-flow from a tainted source to a vulnerable sink."
+      },
+      {
+        "point": "Increasing Recall (FN Reduction)",
+        "detail": "Recall increases as False Negatives (FN) decrease. This requires the model to be more 'Aggressive'. FN reduction is achieved by providing the AI with more context about the application's architecture (e.g., explaining that a custom library is actually an ORM), preventing it from missing hidden vulnerabilities."
+      }
+    ]
+  },
+  {
+    "id": "statistical-validation",
+    "category": "Research Workflow",
+    "title": "Comparative Statistical Validation",
+    "description": "Step-by-step guide for cross-model benchmarking and result verification.",
+    "technical_points": [
+      {
+        "point": "Model Benchmarking",
+        "detail": "Use the platform to run the same dataset across different Large Language Models (LLMs). Collect the automated classifications and compare them. The model with the higher 'Area Under the Curve' (AUC) in your Precision-Recall graph is statistically superior for Node.js auditing."
+      },
+      {
+        "point": "Expert Verification Loop",
+        "detail": "The 'isVerified' toggle is used to eliminate 'AI Bias'. A researcher must manually check a subset of results. If the AI flags a bug (TP) but the logic is flawed, the researcher must invalidate it. This ensures that the final thesis data is grounded in human expertise."
+      }
+    ]
+  },
+  {
+    "id": "code-sources",
+    "category": "Data Sourcing",
+    "title": "Where to find Research Samples?",
+    "description": "High-quality sources for vulnerable and secure code snippets for your thesis.",
+    "technical_points": [
+      {
+        "point": "OWASP Benchmark",
+        "detail": "A scientific test suite designed to evaluate the speed and accuracy of automated software security tools. Perfect for generating TP and FN cases."
+      },
+      {
+        "point": "SARD (NIST)",
+        "detail": "The Software Assurance Reference Dataset provides thousands of documented 'Broken' and 'Fixed' code snippets. Excellent for testing if AI can distinguish between vulnerable code and its secure patch."
+      },
+      {
+        "point": "GitHub Security Lab",
+        "detail": "Search for 'CodeQL' queries or 'Security Advisories' in Node.js repositories to find real-world exploits used in production environments."
+      },
+      {
+        "point": "CVE Details & Exploit-DB",
+        "detail": "Search for specific CVE IDs related to Express.js or Fastify. Reverse-engineer the reported vulnerabilities into small code snippets for robustness testing."
+      }
+    ]
+  }
+]
