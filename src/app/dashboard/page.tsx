@@ -36,7 +36,7 @@ export default function OverviewPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase">Dashboard Overview</h1>
-          <p className="text-slate-400 text-sm">System status and recent research progress.</p>
+          <p className="text-slate-100 text-sm">System status and recent research progress.</p>
         </div>
         <Button className="bg-brand-gradient text-brand-dark font-black rounded-xl" asChild>
           <Link href="/dashboard/audit"><Code2 className="mr-2 h-4 w-4" /> Start New Audit</Link>

@@ -42,13 +42,13 @@ export default function MyHistoryPage() {
           <h1 className="text-3xl font-black text-white italic tracking-tighter flex items-center gap-3">
              <UserCircle className="text-brand-primary w-8 h-8" /> MY HISTORY
           </h1>
-          <p className="text-slate-500 text-sm">Review your personal code audit records.</p>
+          <p className="text-slate-100 text-sm">Review your personal code audit records.</p>
         </div>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={() => { setFilters({ classification: "all", severity: "all", isVerified: "all", sort: "-createdAt" }); setPage(1); }} 
-          className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-brand-dark font-black rounded-xl h-10 px-6 transition-all"
+          className="border-brand-primary text-white hover:bg-brand-primary hover:text-brand-dark font-black rounded-xl h-10 px-6 transition-all"
         >
           <FilterX size={16} className="mr-2" /> RESET FILTERS
         </Button>

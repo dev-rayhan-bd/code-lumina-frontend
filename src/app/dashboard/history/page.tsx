@@ -50,14 +50,14 @@ export default function HistoryPage({ isAdmin = true }: { isAdmin?: boolean }) {
           <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">
             {isAdmin ? "Global Index" : "Personal Records"}
           </h1>
-          <p className="text-slate-500 text-sm pl-1 font-medium">Research Data Management System</p>
+          <p className="text-slate-100 text-sm pl-1 font-medium">Research Data Management System</p>
         </div>
         
         {/* Reset Filter - High Contrast Cyan */}
         <Button 
           variant="outline" 
           onClick={resetFilters}
-          className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-brand-dark font-black rounded-xl px-6 h-10 transition-all"
+          className="border-brand-primary text-white hover:bg-brand-primary hover:text-brand-dark font-black rounded-xl px-6 h-10 transition-all"
         >
           <FilterX size={16} className="mr-2" /> RESET FILTERS
         </Button>
