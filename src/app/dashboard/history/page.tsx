@@ -1,212 +1,196 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
-import { 
-  Card, CardContent 
-} from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { 
-  Search, Filter, Loader2, ExternalLink, 
-  CheckCircle2, Calendar, Bug, ChevronLeft, ChevronRight, Code2 
-} from "lucide-react";
+import { Loader2, FilterX, ShieldCheck, ChevronRight, Hash, ArrowUpDown, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { reviewService } from "@/services/review.service";
 
-export default function HistoryPage() {
-  const queryClient = useQueryClient();
-  
-  // States for Filter, Search and Pagination
+export default function HistoryPage({ isAdmin = true }: { isAdmin?: boolean }) {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [classification, setClassification] = useState("all");
-  const limit = 6;
+  const [filters, setFilters] = useState<any>({
+    classification: "all",
+    severity: "all",
+    isVerified: "all",
+    sort: "-createdAt" // Default: Newest first
+  });
 
-  // ১. ডেটা ফেচিং (Filters & Pagination সহ)
+  // Query Params তৈরি
+  const queryParams: any = {
+    page,
+    limit: 10,
+    sort: filters.sort,
+  };
+  if (filters.classification !== "all") queryParams.classification = filters.classification;
+  if (filters.severity !== "all") queryParams.severity = filters.severity;
+  if (filters.isVerified !== "all") queryParams.isVerified = filters.isVerified;
+
   const { data, isLoading } = useQuery({
-    queryKey: ["history", page, search, classification],
-    queryFn: async () => {
-      let url = `/review/my-history?page=${page}&limit=${limit}&search=${search}`;
-      if (classification !== "all") url += `&classification=${classification}`;
-      const res = await axiosInstance.get(url);
-      return res.data.data;
-    },
+    queryKey: ["history", filters, page, isAdmin],
+    queryFn: () => reviewService.getHistory(isAdmin, queryParams),
   });
 
-  // ২. রিভিউ ভেরিফাই করার মিউটেশন
-  const verifyMutation = useMutation({
-    mutationFn: async (id: string) => await axiosInstance.patch(`/review/verify/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["history"] });
-      toast.success("Audit entry verified by researcher!");
-    },
-    onError: (err: any) => toast.error(err.response?.data?.message || "Verification failed"),
-  });
-
-  // ৩. সার্চ বা ফিল্টার চেঞ্জ হলে পেজ ১-এ রিসেট করা
-  const handleFilterChange = (val: string) => {
-    setClassification(val);
+  const resetFilters = () => {
+    setFilters({ classification: "all", severity: "all", isVerified: "all", sort: "-createdAt" });
     setPage(1);
   };
-
-  const handleSearch = (val: string) => {
-    setSearch(val);
-    setPage(1);
-  };
-
-  if (isLoading) return (
-    <div className="flex h-[80vh] flex-col items-center justify-center space-y-4">
-      <Loader2 className="animate-spin text-brand-primary w-10 h-10" />
-      <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Audit Logs...</p>
-    </div>
-  );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      
-      {/* --- Header Section --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6">
-        <div>
-          <h1 className="text-4xl font-black text-white tracking-tighter italic uppercase">Audit History</h1>
-          <p className="text-slate-400 text-sm font-medium">Manage and validate AI detection performance data.</p>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      {/* Header Area */}
+      <div className="flex justify-between items-end">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">
+            {isAdmin ? "Global Index" : "Personal Records"}
+          </h1>
+          <p className="text-slate-500 text-sm pl-1 font-medium">Research Data Management System</p>
         </div>
-        <div className="bg-brand-primary/10 border border-brand-primary/20 px-4 py-2 rounded-xl">
-           <span className="text-brand-primary font-black text-xs uppercase tracking-widest">
-             Total Logs: {data?.meta?.total || 0}
-           </span>
-        </div>
+        
+        {/* Reset Filter - High Contrast Cyan */}
+        <Button 
+          variant="outline" 
+          onClick={resetFilters}
+          className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-brand-dark font-black rounded-xl px-6 h-10 transition-all"
+        >
+          <FilterX size={16} className="mr-2" /> RESET FILTERS
+        </Button>
       </div>
 
-      {/* --- Smart Filter & Search Bar --- */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-brand-deep/50 p-3 rounded-[1.5rem] border border-white/5 backdrop-blur-md">
-        <div className="md:col-span-8 relative group">
-          <Search className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-brand-primary transition-colors" size={18} />
-          <Input 
-            placeholder="Search snippets by keywords..." 
-            className="pl-12 h-12 bg-brand-dark border-white/5 text-white rounded-xl focus:ring-brand-primary/20"
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-        </div>
-        <div className="md:col-span-4">
-          <Select value={classification} onValueChange={handleFilterChange}>
-            <SelectTrigger className="h-12 bg-brand-dark border-white/5 text-slate-300 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Filter size={16} className="text-brand-primary" />
-                <SelectValue placeholder="All Classifications" />
-              </div>
-            </SelectTrigger>
-            <SelectContent className="bg-brand-deep border-white/10 text-white">
-              <SelectItem value="all">All Records</SelectItem>
-              <SelectItem value="TP">True Positive (TP)</SelectItem>
-              <SelectItem value="TN">True Negative (TN)</SelectItem>
-              <SelectItem value="FP">False Positive (FP)</SelectItem>
-              <SelectItem value="FN">False Negative (FN)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* --- Filter & Sorting Panel --- */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-brand-deep/50 border border-white/5 rounded-[2rem] backdrop-blur-md">
+        <FilterBox label="Classification" value={filters.classification} onValueChange={(v:any) => setFilters({...filters, classification: v})} options={["TP", "TN", "FP", "FN"]} />
+        <FilterBox label="Severity" value={filters.severity} onValueChange={(v:any) => setFilters({...filters, severity: v})} options={["Critical", "High", "Medium"]} />
+        
+        {/* Expert Review - Simplified as per your requirement */}
+        <FilterBox label="Expert Review" value={filters.isVerified} onValueChange={(v:any) => setFilters({...filters, isVerified: v})} 
+            options={[{l: "Verified Only", v: "true"}, {l: "Pending Review", v: "false"}]} />
+
+        {/* Rating Sorting - New Feature */}
+        <FilterBox label="Sort by Rating" value={filters.sort} onValueChange={(v:any) => setFilters({...filters, sort: v})} 
+            options={[
+    { l: "Newest First", v: "-createdAt" },  
+    { l: "Oldest First", v: "createdAt" },
+    { l: "Highest Rating", v: "-analysis.rating" }, 
+    { l: "Lowest Rating", v: "analysis.rating" }
+  ]}  />
       </div>
 
-      {/* --- Data List --- */}
-      <div className="grid grid-cols-1 gap-4">
-        {data?.result?.length === 0 ? (
-           <div className="text-center py-24 bg-brand-deep/20 rounded-[2.5rem] border border-dashed border-white/10">
-              <Code2 className="mx-auto text-slate-700 mb-4" size={48} />
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No audit logs found matching your criteria</p>
-           </div>
+      {/* --- Data Table --- */}
+      <Card className="bg-brand-deep border-white/5 shadow-2xl rounded-[2.5rem] overflow-hidden">
+        {isLoading ? (
+          <div className="p-32 flex justify-center"><Loader2 className="animate-spin text-brand-primary w-10 h-10" /></div>
         ) : (
-          data?.result?.map((item: any) => (
-            <Card key={item._id} className="bg-brand-deep border-white/5 p-6 rounded-[2rem] hover:border-brand-primary/30 transition-all group relative">
-              <div className="flex flex-col lg:flex-row justify-between gap-6">
-                
-                <div className="space-y-4 flex-1">
-                  {/* Item Badge & Meta */}
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Badge className={cn(
-                      "border-none font-black text-[10px] px-3 py-1 rounded-lg tracking-widest",
-                      (item.classification === 'TP' || item.classification === 'TN') ? "bg-brand-secondary/10 text-brand-secondary" : "bg-red-400/10 text-red-400"
-                    )}>
-                      {item.classification}
-                    </Badge>
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-bold uppercase">
-                      <Calendar size={12} /> {new Date(item.createdAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-bold uppercase">
-                      <Bug size={12} /> Rating: {item.analysis.rating}/10
-                    </div>
-                    {item.isVerified && (
-                      <Badge className="bg-brand-secondary text-brand-dark font-black text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <CheckCircle2 size={10} /> VERIFIED
-                      </Badge>
-                    )}
-                  </div>
+          <>
+            <Table>
+              <TableHeader className="bg-brand-accent/40 border-b border-white/5">
+                <TableRow className="hover:bg-transparent border-none">
+                  <TableHead className="text-[10px] font-black uppercase text-slate-400 pl-10 h-16">Audit ID</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase text-slate-400">Classification</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase text-slate-400">Security Score</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase text-slate-400">Expert Review</TableHead>
+                  <TableHead className="text-right pr-10 text-[10px] font-black uppercase text-slate-400">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data?.result?.map((row: any) => (
+                  <TableRow key={row._id} className="border-b border-white/5 hover:bg-white/[0.02] h-20 transition-colors group">
+                    <TableCell className="font-mono text-xs text-slate-300 pl-10 flex items-center gap-2 h-20">
+                       <Hash size={12} className="text-brand-primary opacity-50" /> {row._id.slice(-8)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={cn(
+                        "rounded-lg border-none font-black text-[10px] px-3 py-1",
+                        row.classification === 'TP' || row.classification === 'TN' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                      )}>{row.classification}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm font-bold text-white">{row.analysis.rating}/10</TableCell>
+                    <TableCell>
+                      {row.isVerified ? (
+                        <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-[9px] uppercase tracking-wider">
+                          <ShieldCheck size={14} /> Verified
+                        </div>
+                      ) : (
+                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">In Review</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right pr-10">
+                      {/* Action Button - Fully Visible Cyan */}
+                      <Button asChild size="sm" className="bg-brand-primary text-brand-dark hover:bg-white font-black rounded-xl h-9 px-5 transition-all">
+                        <Link href={`/dashboard/history/${row._id}`}>View Details</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-                  {/* Code Snippet Preview */}
-                  <div className="relative">
-                    <pre className="bg-brand-dark/50 p-5 rounded-2xl text-[11px] text-slate-300 font-mono line-clamp-2 border border-white/5 group-hover:text-white transition-colors overflow-hidden">
-                      <code>{item.codeSnippet}</code>
-                    </pre>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-3">
-                  {!item.isVerified && (
+            {/* --- Pagination Controls --- */}
+            <div className="p-6 bg-brand-accent/20 flex items-center justify-between border-t border-white/5">
+                <p className="text-xs text-slate-500 font-medium">
+                  Showing page <span className="text-white">{data?.meta?.page}</span> of {data?.meta?.totalPage}
+                </p>
+                <div className="flex gap-2">
                     <Button 
-                      onClick={() => verifyMutation.mutate(item._id)} 
-                      disabled={verifyMutation.isPending}
-                      className="bg-brand-primary/10 text-brand-primary border border-brand-primary/20 hover:bg-brand-primary hover:text-brand-dark rounded-xl font-bold text-[10px] uppercase px-5 h-10 transition-all"
+                      variant="outline" 
+                      size="sm" 
+                      disabled={page === 1}
+                      onClick={() => setPage(page - 1)}
+                      className="border-white/10 text-white hover:bg-white/5 rounded-lg"
                     >
-                      {verifyMutation.isPending ? "Validating..." : "Verify Result"}
+                        <ChevronLeft size={16} /> Prev
                     </Button>
-                  )}
-                  <Link href={`/dashboard/history/${item._id}`}>
-                    <Button variant="outline" size="icon" className="border-white/5 bg-brand-accent/50 text-slate-400 hover:text-brand-primary hover:border-brand-primary/30 rounded-xl h-10 w-10">
-                      <ExternalLink size={18} />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={page >= (data?.meta?.totalPage || 1)}
+                      onClick={() => setPage(page + 1)}
+                      className="border-white/10 text-white hover:bg-white/5 rounded-lg"
+                    >
+                        Next <ChevronRight size={16} />
                     </Button>
-                  </Link>
                 </div>
-              </div>
-            </Card>
-          ))
+            </div>
+          </>
         )}
-      </div>
-
-      {/* --- Smart Pagination --- */}
-      {data?.meta?.totalPage > 1 && (
-        <div className="flex justify-center items-center gap-8 pt-8">
-           <Button 
-             variant="ghost" 
-             disabled={page === 1} 
-             onClick={() => setPage(p => p - 1)}
-             className="text-slate-400 hover:text-white disabled:opacity-20"
-           >
-             <ChevronLeft className="mr-2" size={20} /> Previous
-           </Button>
-           
-           <div className="flex items-center gap-2">
-              <span className="text-brand-primary font-black font-mono text-lg">{page}</span>
-              <span className="text-slate-600 font-bold">/</span>
-              <span className="text-slate-400 font-bold font-mono">{data?.meta?.totalPage}</span>
-           </div>
-
-           <Button 
-             variant="ghost" 
-             disabled={page >= data?.meta?.totalPage} 
-             onClick={() => setPage(p => p + 1)}
-             className="text-slate-400 hover:text-white disabled:opacity-20"
-           >
-             Next <ChevronRight className="ml-2" size={20} />
-           </Button>
-        </div>
-      )}
-
+      </Card>
     </div>
   );
 }
+
+// Helper Filter Component
+const FilterBox = ({ label, value, onValueChange, options }: any) => (
+  <div className="space-y-1.5 w-full">
+    <label className="text-[10px] font-black text-brand-primary uppercase tracking-widest ml-1 opacity-70">
+      {label}
+    </label>
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className="bg-brand-dark border-white/10 text-white h-11 rounded-xl focus:ring-brand-primary/20 w-full">
+ 
+        <SelectValue placeholder="Select Sort" />
+      </SelectTrigger>
+      <SelectContent className="bg-brand-deep border-white/10 text-white rounded-xl">
+  
+        {label !== "Sort" && label !== "Sort by Rating" && (
+          <SelectItem value="all">All {label}</SelectItem>
+        )}
+        
+        {options.map((opt: any) => (
+          <SelectItem 
+            key={opt.v} 
+            value={opt.v}
+            className="focus:bg-brand-primary focus:text-brand-dark cursor-pointer font-medium"
+          >
+            {opt.l}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);

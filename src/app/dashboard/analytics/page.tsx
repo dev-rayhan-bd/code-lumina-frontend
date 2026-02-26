@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
           </p>
         </div>
         <div className="bg-brand-primary/10 border border-brand-primary/20 px-6 py-2 rounded-2xl">
-          <span className="text-emerald-400 font-black text-sm uppercase tracking-widest">
+          <span className="text-white font-black text-sm uppercase tracking-widest">
             Samples: {data.metrics.totalSamples}
           </span>
         </div>
