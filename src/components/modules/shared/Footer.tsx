@@ -19,7 +19,7 @@ export const Footer = () => {
             </Link>
             <p className="text-sm text-slate-100 leading-relaxed">
               Evaluating the Accuracy and Reliability of LLM-powered Code Review Systems for Node.js Applications. 
-              <br /><span className="text-brand-primary/60 italic text-xs font-medium">A Final Year CSE Thesis.</span>
+              {/* <br /><span className="text-brand-primary/60 italic text-xs font-medium">A Final Year CSE Thesis.</span> */}
             </p>
             <div className="flex gap-5 pt-2">
               <a href="https://github.com/Rayhan108" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-brand-primary transition-colors">

@@ -69,8 +69,8 @@ export default function ContactPage() {
             <div className="space-y-6">
               {[
                 { icon: MapPin, t: "Base", d: "Dhaka, Bangladesh" },
-                { icon: Mail, t: "Email", d: "research@codelumina.ai" },
-                { icon: Github, t: "Dataset", d: "github.com/codelumina" },
+                { icon: Mail, t: "Email", d: "raihanshorker56@gmail.com" },
+                { icon: Github, t: "Github", d: "https://github.com/Rayhan108" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4 group">
                   <div className="bg-brand-accent/50 p-3 rounded-2xl border border-white/5 group-hover:border-brand-primary/50 transition-colors">
