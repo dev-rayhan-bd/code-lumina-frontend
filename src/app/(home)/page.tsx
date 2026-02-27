@@ -3,9 +3,10 @@ import { Hero } from "@/components/modules/landing/Hero";
 import { ResearchStats } from "@/components/modules/landing/ResearchStats";
 ;
 import { Features } from "@/components/modules/landing/Features";
+import { ResearchFramework } from "@/components/modules/landing/Framework";
 
 
-import { ModelComparison } from "@/components/modules/landing/ComparisonSection";
+
 
 
 
@@ -20,7 +21,7 @@ export default function LandingPage() {
         <ResearchStats />
 
         <Features />
-        <ModelComparison/>
+        <ResearchFramework/>
       </main>
 
     </div>

@@ -9,4 +9,8 @@ export const reviewService = {
     const { data } = await axiosInstance.get(endpoint, { params });
     return data.data;
   },
+    getGlobalMetrics: async () => {
+    const { data } = await axiosInstance.get("/review/analytics");
+    return data.data;
+  },
 };
