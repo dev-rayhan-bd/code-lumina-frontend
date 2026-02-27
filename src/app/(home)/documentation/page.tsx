@@ -187,7 +187,7 @@ export default function DocumentationPage() {
                     {/* Placeholder Area (To maintain the zigzag) */}
                     <div
                       className={cn(
-                        "hidden lg:flex flex-col items-center justify-center order-1",
+                        "hidden lg:flex flex-col items-center justify-center order-1 ",
                         isLeft ? "lg:order-2" : "lg:order-1",
                       )}
                     >
@@ -199,7 +199,7 @@ export default function DocumentationPage() {
                           opacity: 1,
                           transition: { duration: 0.4, ease: "easeOut" },
                         }}
-                        className="p-12 rounded-[4rem] bg-brand-primary/5 border border-brand-primary/10 flex flex-col items-center justify-center space-y-4 shadow-inner"
+                        className="p-12 rounded-[4rem] bg-brand-primary/5 border  border-brand-primary/10 flex flex-col items-center justify-center space-y-4 shadow-inner"
                       >
                         <div className="p-6 bg-brand-dark rounded-3xl border border-brand-primary/20 shadow-xl ">
                           <Icon
@@ -207,7 +207,7 @@ export default function DocumentationPage() {
                             className="text-brand-primary  opacity-50"
                           />
                         </div>
-                        <h4 className="text-sm font-black text-white tracking-[0.4em] uppercase opacity-30">
+                        <h4 className="text-sm font-black text-white  tracking-[0.4em] uppercase opacity-30">
                           {section.category}
                         </h4>
                       </motion.div>
