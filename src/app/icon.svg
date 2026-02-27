@@ -1,0 +1,15 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <!-- Main Shield -->
+  <path d="M250 50L100 110V250C100 350 160 420 250 450C340 420 400 350 400 250V110L250 50Z" 
+        stroke="url(#logo-gradient)" stroke-width="25" stroke-linejoin="round" fill="rgba(6, 182, 212, 0.05)"/>
+  <!-- Code Symbol inside -->
+  <path d="M190 210L150 250L190 290" stroke="white" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M310 210L350 250L310 290" stroke="white" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M270 190L230 310" stroke="url(#logo-gradient)" stroke-width="25" stroke-linecap="round"/>
+</svg>
