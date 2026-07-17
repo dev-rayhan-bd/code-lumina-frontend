@@ -24,20 +24,22 @@ export const ResearchStats = () => {
     );
   }
 
-  if (isError) return null;
+  if (isError || !data) return null;
+
+  const metrics = data.metrics || {};
 
   const stats = [
     { 
       label: "Audits Completed", 
-      value: data.metrics.totalSamples || "0" 
+      value: metrics.totalSamples || "0" 
     },
     { 
       label: "Success Accuracy", 
-      value: data.metrics.accuracy || "0%" 
+      value: metrics.accuracy || "0%" 
     },
     { 
       label: "System Recall", 
-      value: data.metrics.recall || "0%" 
+      value: metrics.recall || "0%" 
     },
     { 
       label: "Inference Speed", 

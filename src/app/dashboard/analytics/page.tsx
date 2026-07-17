@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   HelpCircle,
   Info,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -92,7 +93,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* --- KPI Cards --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           {
             label: "Accuracy",
@@ -137,6 +138,23 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         ))}
+
+        {/* F1 Score Card */}
+        <Card className="bg-brand-deep border-white/5 shadow-2xl rounded-[2rem] group hover:border-brand-primary/30 transition-all">
+          <CardContent className="p-8 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                F1 Score
+              </p>
+              <h3 className="text-4xl font-black tracking-tighter text-purple-400">
+                {data.metrics.f1Score}
+              </h3>
+            </div>
+            <div className="bg-white/5 p-4 rounded-3xl group-hover:scale-110 transition-transform">
+              <Zap className="w-8 h-8 text-purple-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* --- Visualizations --- */}
