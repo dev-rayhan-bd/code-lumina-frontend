@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
+  baseURL: '/api/v1',
   withCredentials: true, //*** eta chara token transfer hoy na */
 });
 

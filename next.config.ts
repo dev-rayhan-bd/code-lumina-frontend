@@ -14,10 +14,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-
         source: '/api/v1/:path*',
-
-        destination: 'https://ai-code-reviewer-lake-zeta.vercel.app/api/v1/:path*', 
+        destination: `${process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/api\/v1$/, '') || 'http://10.10.28.81:5000'}/api/v1/:path*`,
       },
     ];
   },
